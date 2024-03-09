@@ -49,15 +49,14 @@ func postUserAddHandler(w http.ResponseWriter, r *http.Request) {
 		Email: params["Email"].(string),
 		Age:   int32(age),
 	})
-
-	j, err := json.Marshal(u)
 	if err != nil {
 		m := fmt.Sprintf("%d Internal Server Error: %s", http.StatusInternalServerError, err)
 		httpError(w, m)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+	w.Write([]byte(fmt.Sprintf("User Created: %v\n", u)))
 }
 
 func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,8 +91,14 @@ func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(w, m)
 		return
 	}
+	if err != nil {
+		m := fmt.Sprintf("%d Internal Server Error: %s", http.StatusInternalServerError, err)
+		httpError(w, m)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/text")
-	w.Write([]byte(fmt.Sprintf("User Deleted: %v", u)))
+	w.Write([]byte(fmt.Sprintf("User Deleted: %v\n", u)))
 }
 
 func postUserUpdateHandler(w http.ResponseWriter, r *http.Request) {
@@ -165,7 +170,7 @@ func postUserUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/text")
-	w.Write([]byte(fmt.Sprintf("User Updated: %v", u)))
+	w.Write([]byte(fmt.Sprintf("User Updated: %v\n", u)))
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -206,5 +211,5 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/text")
-	w.Write([]byte(fmt.Sprintf("User Updated: %v", u)))
+	w.Write([]byte(fmt.Sprintf("User Updated: %v\n", u)))
 }
