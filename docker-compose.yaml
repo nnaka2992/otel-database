@@ -1,0 +1,27 @@
+version: "3"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: otel-frontend
+    ports:
+      - 8081:8081
+  backend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: otel-backend
+    ports:
+      - 8080:8080
+  postgres:
+    image: postgres:16.2
+    container_name: otel-database
+    environment:
+      POSTGRES_PASSWORD: "test123"
+    volumes:
+      - type: bind
+        source: ./database/docker-entrypoint-initdb.d
+        target: /docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432

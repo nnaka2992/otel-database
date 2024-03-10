@@ -2,29 +2,31 @@ package main
 
 import (
 	"bytes"
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 	"context"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"io"
+	"os"
+	"os/signal"
 	"strconv"
-
+	"syscall"
 )
 
 var signalChan chan (os.Signal) = make(chan os.Signal, 1)
-const url = "http://localhost:8080"
+var backendURL string
 
 func main() {
+	port := os.Getenv("PORT")
+	backendURL = os.Getenv("URL")
+
 	ctx := context.Background()
 	// SIGINT handles Ctrl+C locally.
 	// SIGTERM handles Cloud Run termination signal.
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	srv := http.Server{
-		Addr:    ":8081",
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: nil,
 	}
 	go func() {
@@ -62,7 +64,7 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userHelper(w, r, url+"/user/", "GET")
+	userHelper(w, r, backendURL+"/user/", "GET")
 }
 
 func postUserAddHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +81,7 @@ func postUserAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userHelper(w, r, url+"/user/new", "POST")
+	userHelper(w, r, backendURL+"/user/new", "POST")
 }
 
 func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +98,7 @@ func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userHelper(w, r, url+"/user/delete", "DELETE")
+	userHelper(w, r, backendURL+"/user/delete", "DELETE")
 }
 
 func PostUserUpdateHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +115,7 @@ func PostUserUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userHelper(w, r, url+"/user/update", "POST")
+	userHelper(w, r, backendURL+"/user/update", "POST")
 }
 
 func userHelper(w http.ResponseWriter, r *http.Request, url string, method string) {

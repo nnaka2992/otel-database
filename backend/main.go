@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +23,14 @@ var (
 )
 
 func main() {
-	connStr := "postgres://app:otel_password@localhost:5432/otel?sslmode=disable"
+	db_password := os.Getenv("DB_PASSWORD")
+	db_port := os.Getenv("DB_PORT")
+	db_user := os.Getenv("DB_USER")
+	db_name := os.Getenv("DB_NAME")
+	db_host := os.Getenv("DB_HOST")
+	port := os.Getenv("PORT")
+
+	connStr := "postgres://" + db_user + ":" + db_password + "@" + db_host + ":" + db_port + "/" + db_name + "?sslmode=disable"
 	if err := initDB(connStr); err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +47,7 @@ func main() {
 	mux.HandleFunc("/user/delete", deleteUserDeleteHandler)
 	mux.HandleFunc("/user/update", postUserUpdateHandler)
 	srv := http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: mux,
 	}
 	go func() {
