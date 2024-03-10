@@ -34,6 +34,7 @@ func main() {
 		http.HandleFunc("/user/new", postUserAddHandler)
 		http.HandleFunc("/user/delete", deleteUserDeleteHandler)
 		http.HandleFunc("/user/update", PostUserUpdateHandler)
+		http.HandleFunc("/health", healthHandler)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
@@ -162,4 +163,9 @@ func httpError(w http.ResponseWriter, m string) {
 	}
 	http.Error(w, m, code)
 	log.Printf(m)
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }

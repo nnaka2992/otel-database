@@ -50,6 +50,7 @@ func main() {
 		http.HandleFunc("/user/new", postUserAddHandler)
 		http.HandleFunc("/user/delete", deleteUserDeleteHandler)
 		http.HandleFunc("/user/update", postUserUpdateHandler)
+		http.HandleFunc("/health", healthHandler)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
@@ -64,4 +65,9 @@ func main() {
 		log.Printf("server shutdown failed: %+v", err)
 	}
 	log.Print("server exited")
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
