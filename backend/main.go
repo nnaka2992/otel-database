@@ -41,16 +41,15 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start HTTP server.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/user/", getUserHandler)
-	mux.HandleFunc("/user/new", postUserAddHandler)
-	mux.HandleFunc("/user/delete", deleteUserDeleteHandler)
-	mux.HandleFunc("/user/update", postUserUpdateHandler)
 	srv := http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
-		Handler: mux,
+		Handler: nil,
 	}
 	go func() {
+		http.HandleFunc("/user/", getUserHandler)
+		http.HandleFunc("/user/new", postUserAddHandler)
+		http.HandleFunc("/user/delete", deleteUserDeleteHandler)
+		http.HandleFunc("/user/update", postUserUpdateHandler)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
