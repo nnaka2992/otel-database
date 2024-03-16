@@ -10,16 +10,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-
 	db "github.com/nnaka2992/otel-database/backend/gen/sqlc"
 )
 
 // Create channel to listen for signals.
 var (
 	signalChan chan (os.Signal) = make(chan os.Signal, 1)
-	pool       *pgxpool.Pool
-	query      *db.Queries
+	query		 *db.Queries
 )
 
 func main() {
@@ -31,9 +28,12 @@ func main() {
 	port := os.Getenv("PORT")
 
 	connStr := "postgres://" + db_user + ":" + db_password + "@" + db_host + ":" + db_port + "/" + db_name + "?sslmode=disable"
-	if err := initDB(connStr); err != nil {
+	pool, err := db.NewDB(connStr)
+	if err != nil {
 		log.Fatal(err)
 	}
+	defer pool.Close()
+	query = db.New(pool)
 
 	ctx := context.Background()
 	// SIGINT handles Ctrl+C locally.

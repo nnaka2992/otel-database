@@ -7,19 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	db "github.com/nnaka2992/otel-database/backend/gen/sqlc"
 )
-
-func initDB(connStr string) error {
-	var err error
-	pool, err = db.NewPool(connStr)
-	if err != nil {
-		return err
-	}
-	query = db.New(pool)
-	return nil
-}
 
 func httpError(w http.ResponseWriter, m string) {
 	code, err := strconv.Atoi(m[:3])

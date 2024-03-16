@@ -1,23 +1,18 @@
 package sqlc
 
 import (
-	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"database/sql"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-func NewPool(connStr string) (*pgxpool.Pool, error) {
-	config, err := pgxpool.ParseConfig(connStr)
+func NewDB(connStr string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		return nil, err
 	}
-
-	pool, err := pgxpool.ConnectConfig(context.Background(), config)
-	if err != nil {
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-
-	if err := pool.Ping(context.Background()); err != nil {
-		return nil, err
-	}
-	return pool, nil
+	return db, nil
 }
