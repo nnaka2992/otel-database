@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	db "github.com/nnaka2992/otel-database/backend/gen/sqlc"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // Create channel to listen for signals.
@@ -26,6 +27,12 @@ func main() {
 	db_name := os.Getenv("DB_NAME")
 	db_host := os.Getenv("DB_HOST")
 	port := os.Getenv("PORT")
+
+	tp, err := initTracer()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tp.Shutdown(context.Background())
 
 	connStr := "postgres://" + db_user + ":" + db_password + "@" + db_host + ":" + db_port + "/" + db_name + "?sslmode=disable"
 	pool, err := db.NewDB(connStr)
@@ -46,11 +53,11 @@ func main() {
 		Handler: nil,
 	}
 	go func() {
-		http.HandleFunc("/user/", getUserHandler)
-		http.HandleFunc("/user/new", postUserAddHandler)
-		http.HandleFunc("/user/delete", deleteUserDeleteHandler)
-		http.HandleFunc("/user/update", postUserUpdateHandler)
-		http.HandleFunc("/health", healthHandler)
+		http.Handle("/user/"      , otelhttp.NewHandler(http.HandlerFunc(getUserHandler), "getUserHandler")                  )
+		http.Handle("/user/new"   , otelhttp.NewHandler(http.HandlerFunc(postUserAddHandler), "postUserAddHandler")          )
+		http.Handle("/user/delete", otelhttp.NewHandler(http.HandlerFunc(deleteUserDeleteHandler), "deleteUserDeleteHandler"))
+		http.Handle("/user/update", otelhttp.NewHandler(http.HandlerFunc(postUserUpdateHandler), "postUserUpdateHandler")    )
+		http.Handle("/health"     , otelhttp.NewHandler(http.HandlerFunc(healthHandler), "healthHandler"))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

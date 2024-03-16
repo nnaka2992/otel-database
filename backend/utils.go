@@ -7,6 +7,12 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"os"
+
+	"go.opentelemetry.io/otel"
+	stdout "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func httpError(w http.ResponseWriter, m string) {
@@ -31,4 +37,29 @@ func readJson(r *http.Request) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("%d Bad Request: %s", http.StatusBadRequest, err)
 	}
 	return params, nil
+}
+
+func initTracer() (*sdktrace.TracerProvider, error) {
+	exporter, err := stdout.New(
+		stdout.WithPrettyPrint(),
+		stdout.WithWriter(os.Stdout),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize stdout exporter: %w", err)
+	}
+
+	// Create a new tracer provider with the exporter and a sampler.
+	provider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+	)
+
+	// Register the trace provider with the global tracer provider.
+	otel.SetTracerProvider(provider)
+
+	// Set the global propagator to tracecontext so that the trace and span IDs from the incoming request
+	// are extracted and propagated to the outgoing requests.
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	return provider, nil
 }
