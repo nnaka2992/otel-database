@@ -1,2 +1,3 @@
 go 1.22.1
 terraform 1.7.5
+gcloud 467.0.0
