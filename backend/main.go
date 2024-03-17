@@ -17,7 +17,7 @@ import (
 // Create channel to listen for signals.
 var (
 	signalChan chan (os.Signal) = make(chan os.Signal, 1)
-	query		 *db.Queries
+	query      *db.Queries
 )
 
 func main() {
@@ -53,11 +53,11 @@ func main() {
 		Handler: nil,
 	}
 	go func() {
-		http.Handle("/user/"      , otelhttp.NewHandler(http.HandlerFunc(getUserHandler), "getUserHandler")                  )
-		http.Handle("/user/new"   , otelhttp.NewHandler(http.HandlerFunc(postUserAddHandler), "postUserAddHandler")          )
+		http.Handle("/user/", otelhttp.NewHandler(http.HandlerFunc(getUserHandler), "getUserHandler"))
+		http.Handle("/user/new", otelhttp.NewHandler(http.HandlerFunc(postUserAddHandler), "postUserAddHandler"))
 		http.Handle("/user/delete", otelhttp.NewHandler(http.HandlerFunc(deleteUserDeleteHandler), "deleteUserDeleteHandler"))
-		http.Handle("/user/update", otelhttp.NewHandler(http.HandlerFunc(postUserUpdateHandler), "postUserUpdateHandler")    )
-		http.Handle("/health"     , otelhttp.NewHandler(http.HandlerFunc(healthHandler), "healthHandler"))
+		http.Handle("/user/update", otelhttp.NewHandler(http.HandlerFunc(postUserUpdateHandler), "postUserUpdateHandler"))
+		http.Handle("/health", otelhttp.NewHandler(http.HandlerFunc(healthHandler), "healthHandler"))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"os"
 
 	"go.opentelemetry.io/otel"
