@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"go.opentelemetry.io/otel"
-	stdout "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.11.0"
 )
 
 func httpError(w http.ResponseWriter, m string) {
@@ -40,26 +42,35 @@ func readJson(r *http.Request) (map[string]interface{}, error) {
 }
 
 func initTracer() (*sdktrace.TracerProvider, error) {
-	exporter, err := stdout.New(
-		stdout.WithPrettyPrint(),
-		stdout.WithWriter(os.Stdout),
+	// OTLP exporter config for Collector (using default config)
+	exporter, err := otlptracegrpc.New(
+		context.Background(),
+		otlptracegrpc.WithEndpoint("localhost:4317"),
+		otlptracegrpc.WithInsecure(),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize stdout exporter: %w", err)
+		return nil, err
 	}
-
-	// Create a new tracer provider with the exporter and a sampler.
-	provider := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+	res, err := resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("otel-database"),
+			semconv.ServiceVersionKey.String("1.0.0"),
+			semconv.DeploymentEnvironmentKey.String("production"),
+			semconv.TelemetrySDKNameKey.String("opentelemetry"),
+			semconv.TelemetrySDKLanguageKey.String("go"),
+			semconv.TelemetrySDKVersionKey.String("1.24.0"),
+		),
 	)
-
-	// Register the trace provider with the global tracer provider.
-	otel.SetTracerProvider(provider)
-
-	// Set the global propagator to tracecontext so that the trace and span IDs from the incoming request
-	// are extracted and propagated to the outgoing requests.
+	if err != nil {
+		return nil, err
+	}
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
-
-	return provider, nil
+	return tp, nil
 }
