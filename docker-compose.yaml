@@ -1,15 +1,5 @@
 version: "3"
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: otel-frontend
-    ports:
-      - 8081:8081
-    environment:
-      PORT: "8081"
-      URL: "http://backend:8080"
   backend:
     build:
       context: ./backend
