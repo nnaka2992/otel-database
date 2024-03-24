@@ -10,7 +10,8 @@ import (
 	"strconv"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+    "go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -43,16 +44,13 @@ func readJson(r *http.Request) (map[string]interface{}, error) {
 
 func initTracer() (*sdktrace.TracerProvider, error) {
 	// OTLP exporter config for Collector (using default config)
-	exporter, err := otlptracegrpc.New(
-		context.Background(),
-		otlptracegrpc.WithEndpoint("localhost:4317"),
-		otlptracegrpc.WithInsecure(),
-	)
+	exporter, err := texporter.New(texporter.WithProjectID("otel-database"))
 	if err != nil {
 		return nil, err
 	}
 	res, err := resource.New(
 		context.Background(),
+		resource.WithDetectors(gcp.NewDetector()),
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String("otel-database"),
 			semconv.ServiceVersionKey.String("1.0.0"),
