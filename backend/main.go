@@ -55,6 +55,7 @@ func main() {
 	go func() {
 		http.Handle("/user/", otelhttp.NewHandler(http.HandlerFunc(getUserHandler), "getUserHandler"))
 		http.Handle("/user/new", otelhttp.NewHandler(http.HandlerFunc(postUserAddHandler), "postUserAddHandler"))
+		http.Handle("/user/new_many", otelhttp.NewHandler(http.HandlerFunc(postUserManyAddHandler), "postUserManyAddHandler"))
 		http.Handle("/user/delete", otelhttp.NewHandler(http.HandlerFunc(deleteUserDeleteHandler), "deleteUserDeleteHandler"))
 		http.Handle("/user/update", otelhttp.NewHandler(http.HandlerFunc(postUserUpdateHandler), "postUserUpdateHandler"))
 		http.Handle("/health", otelhttp.NewHandler(http.HandlerFunc(healthHandler), "healthHandler"))
