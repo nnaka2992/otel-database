@@ -92,7 +92,7 @@ func postUserManyAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i := 0; i < 100; i++ {
-		u, err := query.CreateUser(ctx, db.CreateUserParams{
+		_, err := query.CreateUser(ctx, db.CreateUserParams{
 			Name:  params["Name"].(string),
 			Email: params["Email"].(string)+"_"+strconv.Itoa(i),
 			Age:   int32(age),
@@ -105,7 +105,7 @@ func postUserManyAddHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(fmt.Sprintf("User Created: %v\n", u)))
+	w.Write([]byte(fmt.Sprintf("User Created: 100 users created\n")))
 }
 
 func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
