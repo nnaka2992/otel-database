@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -36,7 +35,7 @@ func postUserAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := r.Context()
 	age, err := strconv.Atoi(params["Age"].(string))
 	if err != nil {
 		m := fmt.Sprintf("%d Internal Server Error: %s", http.StatusInternalServerError, "Invalid Input")
@@ -79,7 +78,7 @@ func deleteUserDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := r.Context()
 	var u db.User
 	if params["ID"] != nil && params["ID"] != 0 {
 		u, err = query.DeleteUserByID(ctx, params["ID"].(int32))
@@ -121,7 +120,7 @@ func postUserUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := r.Context()
 	var u db.User
 	if params["ID"] != nil && params["ID"] != 0 {
 		u, err = query.GetUserByID(ctx, params["ID"].(int32))
@@ -193,7 +192,7 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := r.Context()
 	var u db.User
 	if params["ID"] != nil && params["ID"] != 0 {
 		u, err = query.GetUserByID(ctx, params["ID"].(int32))
