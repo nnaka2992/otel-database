@@ -4,6 +4,8 @@ go 1.21.5
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.21.0
+	github.com/google/sqlcommenter/go/core v0.1.2
+	github.com/google/sqlcommenter/go/database/sql v0.1.1
 	github.com/jackc/pgx/v4 v4.18.2
 	go.opentelemetry.io/contrib/detectors/gcp v1.24.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
